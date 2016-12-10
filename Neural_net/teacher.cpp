@@ -6,13 +6,8 @@ Teacher::Teacher(vector<double> &netChar)
     createRespAndTopo();
     networkToTeach = new Net(TOPOLOGY, NETCHAR);
     teachNetwork();
-
-    for(unsigned x = 0; x < TOPOLOGY.back(); x++)
-    {
-        cout << "wyjscie " << x+1 << endl;
-        networkToTeach->feedForward(SIGNALS[x]);
-        networkToTeach->drawNetwork(false,true);
-    }
+    networkToTeach->saveNetwork();
+    drawResults();
 }
 
 void Teacher::createRespAndTopo()
@@ -26,7 +21,7 @@ void Teacher::createRespAndTopo()
         cout << "Wprowadz nazwe pliku z danymi wejsciowymi z folderu Signals " << endl;
         string fileName, fileDir = "Signals/";
         getline(cin, fileName);
-        fileDir +=fileName + ".txt";
+        fileDir +=fileName + ".nsignal";
 
         toTeach.open(fileDir, ios::in);
 
@@ -45,67 +40,73 @@ void Teacher::createRespAndTopo()
 
     getline(toTeach, takenLine);
 
+    // Wczytuje TOPOLOGY
     while(!takenLine.empty())
     {
-        unsigned poz = takenLine.find_first_of(";");     // Znajdź pierwszy znak spec
-        takenLine.erase(poz, poz-1);                     // Usuń go
-        string subLine = takenLine.substr(0,poz);        // Zrób substring
-        takenLine.erase(0, poz);                         // Wyrzuć substring z głównego stringu
+        unsigned poz = takenLine.find_first_of(";");            // Znajdź pierwszy znak spec
+        string subLine = takenLine.substr(0, poz);              // Zrób substring
+        takenLine.erase(0, poz+1);                              // Usuń go wraz z ';'
         TOPOLOGY.push_back(stoul(subLine));
     }
 
     getline(toTeach, takenLine);
 
+    // Wczytuję SIGNALS
     unsigned lineCounter = 3;
     while(!toTeach.eof())
     {
         getline(toTeach, takenLine);
 
+        if(takenLine == "RESPONSES")
+        {
+            break;
+        }
+
         SIGNALS.push_back(LETTER());                         // Robimy wektor dla litery
         while(!takenLine.empty())
         {
-            unsigned poz = takenLine.find_first_of(";");      // Znajdź pierwszy znak spec
-            takenLine.erase(poz, poz);                        // Usuń go
-            string subLine = takenLine.substr(0,poz);         // Zrób substring
-            takenLine.erase(0, poz);                          // Wyrzuć substring z głównego stringu
-            SIGNALS.back().push_back(stod(subLine));          // Wrzucamy do litery jej dane
+            unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
+            string subLine = takenLine.substr(0, poz);           // Zrób substring
+            takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
+            SIGNALS.back().push_back(stod(subLine));             // Wrzucamy do litery jej dane
         }
 
         if(SIGNALS.back().size() != TOPOLOGY[0])
         {
             cout << "Struktura danych a ilosc neuronow wejsciowych - NIEZGODNE\nLINIA: " << lineCounter << endl;
-            //return 0;
+            getchar();
         }
 
         lineCounter++;
     }
     if(SIGNALS.size() != TOPOLOGY.back())
     {
-        cout << "Ilosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;
+        cout << "Ilosc sygnalow wejsciowych nie jest zgodna z liczba wyjsc sieci" << endl;
+        getchar();
     }
-    toTeach.close();
 
 
-    // Generuję sygnały uczące
-    unsigned counter = 0;
-    for(unsigned letters = 0; letters < SIGNALS.size(); letters++)
+    // Ładujemy wartości dla RESPONSES
+    while(!toTeach.eof())
     {
+        getline(toTeach, takenLine);
+
         RESPONSES.push_back(LETTER());
-        for(unsigned bits = 0; bits < SIGNALS.back().size(); bits++)
+        while(!takenLine.empty())
         {
-            if(counter == bits)
-            {
-                RESPONSES.back().push_back(1);
-            }
-            else
-            {
-                RESPONSES.back().push_back(0);
-            }
-            counter++;
+            unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
+            string subLine = takenLine.substr(0, poz);           // Zrób substring
+            takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
+            RESPONSES.back().push_back(stod(subLine));           // Wrzucamy do litery jej dane
         }
     }
+    if(SIGNALS.size() != TOPOLOGY.back())
+    {
+        cout << "Ilosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;
+        getchar();
+    }
 
-
+    toTeach.close();
 }
 
 void Teacher::teachNetwork()
@@ -117,12 +118,53 @@ void Teacher::teachNetwork()
     {
         epoch++;
         int randS = rand()%TOPOLOGY.back();
-        //cout << randS << endl;
-        networkToTeach->feedForward(SIGNALS[randS]);
-        networkToTeach->backProp(RESPONSES[randS]);
 
-        if(epoch == 4000)
-        flag = false;
+        networkToTeach->feedForward(SIGNALS[randS]);
+
+        if(networkToTeach->backProp(RESPONSES[randS]) == false)
+            flag = false;
     }
-    cout << "EPOCH " << epoch << endl;
+    cout << "Siec nauczyla sie po " << epoch << " epokach" << endl;
+}
+
+void Teacher::drawResults()
+{
+    typedef vector<double> RESULT;
+    vector<RESULT> OutputsArr;
+
+    //Koloruje wyniki
+    HANDLE hOut;
+    hOut = GetStdHandle( STD_OUTPUT_HANDLE );
+
+    for(unsigned Sig = 0; Sig < TOPOLOGY.back(); Sig++)
+    {
+        networkToTeach->feedForward( SIGNALS[ Sig ] );
+        OutputsArr.push_back( networkToTeach->getOutput( false ) );
+    }
+
+    cout << fixed << endl;
+    cout.precision(4);
+
+    cout << "Signal\t\t";
+    for(unsigned x = 0; x < TOPOLOGY.back(); x++)
+        cout << x + 1 << "\t";
+    cout << endl;
+
+    for(unsigned line = 0; line < TOPOLOGY.back(); line++)
+    {
+        cout << "\t" << line + 1 << " ";
+        for(unsigned column = 0; column < OutputsArr[line].size(); column++)
+        {
+            if(line == column)
+                SetConsoleTextAttribute( hOut, FOREGROUND_RED );
+
+            if(OutputsArr[column][line] >= 0)
+                cout << " ";
+
+            cout << OutputsArr[column][line] << " ";
+
+            SetConsoleTextAttribute( hOut, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED );
+        }
+        cout << endl;
+    }
 }

@@ -96,7 +96,7 @@ void Net::drawNetwork(bool weights, bool signalStrength)
     cout.precision(5);
 }
 
-int Net::backProp(vector<double> &teachSig)
+bool Net::backProp(vector<double> &teachSig)
 {
 
     // Liczę błąd średniokwadratowy
@@ -129,15 +129,15 @@ int Net::backProp(vector<double> &teachSig)
             if(slowDown == 0)
             {
                 system("cls");
-                cout << "Progress = \t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
+                cout << "Progress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
                 slowDown = 20;
-                cout << "sqErrBlur" << sqErrBlur << endl;
+                cout << "sqErrBlur =\t" << sqErrBlur << endl;
             }
 
             sqErrBlur = 0, sqErrCounter = BLUR;
 
             if(tmp_err < MIN_ERR)
-                return 0;
+                return false;
         }
     }
 
@@ -172,7 +172,7 @@ int Net::backProp(vector<double> &teachSig)
             acctLayer[N].updateWeights(prevLayer, ETA, ALFA);
         }
     }
-    return 1;
+    return true;
 }
 
 void Net::saveNetwork()

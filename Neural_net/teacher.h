@@ -19,7 +19,7 @@ private:
 
     void createRespAndTopo();
     void teachNetwork();
-
+    void drawResults();
 };
 
 #endif // TEACHER_H

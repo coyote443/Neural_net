@@ -11,7 +11,7 @@ public:
     Net(vector<unsigned> &topology, vector<double> &netChar);
 
     void feedForward (vector<double> & inputSig);
-    int backProp(vector<double> & teachSig);
+    bool backProp(vector<double> & teachSig);
     vector<double> getOutput(bool drawOutput = false);
 
     void drawNetwork(bool weights, bool signalStrength);
