@@ -8,7 +8,7 @@ typedef vector<Neuron> LAYER;
 class Neuron
 {
 public:
-    Neuron(unsigned weights_num);
+    Neuron(unsigned weights_num, double bias);
 
     void changeOutput(double outNewVal){m_output = outNewVal;}
     void feedForward(LAYER &prevLayer);
@@ -22,7 +22,7 @@ private:
     vector<double> m_weights;
     vector<double> m_d_weights;
     double m_gradient;
-
+    double BIAS;
     double m_output = 0;
 
     double randWeight(void);

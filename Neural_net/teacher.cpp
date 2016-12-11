@@ -6,8 +6,9 @@ Teacher::Teacher(vector<double> &netChar)
     createRespAndTopo();
     networkToTeach = new Net(TOPOLOGY, NETCHAR);
     teachNetwork();
-    networkToTeach->saveNetwork();
     drawResults();
+    cout << endl;
+    networkToTeach->saveNetwork();
 }
 
 void Teacher::createRespAndTopo()
@@ -18,7 +19,9 @@ void Teacher::createRespAndTopo()
     while(true)
     {
         system("cls");
-        cout << "Wprowadz nazwe pliku z danymi wejsciowymi z folderu Signals " << endl;
+        cout << endl;
+        cout << "\tWprowadz nazwe pliku z danymi wejsciowymi z folderu Signals " << endl << endl;
+        cout << "\tNAZWA PLIKU\t";
         string fileName, fileDir = "Signals/";
         getline(cin, fileName);
         fileDir +=fileName + ".nsignal";
@@ -31,7 +34,8 @@ void Teacher::createRespAndTopo()
         }
         else
         {
-            cout << "Zla sciezka / brak dostepu do pliku" << endl;
+            cout << endl;
+            cout << "\tZla sciezka / brak dostepu do pliku" << endl;
             getchar();
         }
     }
@@ -73,7 +77,8 @@ void Teacher::createRespAndTopo()
 
         if(SIGNALS.back().size() != TOPOLOGY[0])
         {
-            cout << "Struktura danych a ilosc neuronow wejsciowych - NIEZGODNE\nLINIA: " << lineCounter << endl;
+            cout << endl;
+            cout << "\tStruktura danych a ilosc neuronow wejsciowych - NIEZGODNE\nLINIA: " << lineCounter << endl;
             getchar();
         }
 
@@ -81,7 +86,8 @@ void Teacher::createRespAndTopo()
     }
     if(SIGNALS.size() != TOPOLOGY.back())
     {
-        cout << "Ilosc sygnalow wejsciowych nie jest zgodna z liczba wyjsc sieci" << endl;
+        cout << endl;
+        cout << "\tIlosc sygnalow wejsciowych nie jest zgodna z liczba wyjsc sieci" << endl;
         getchar();
     }
 
@@ -102,7 +108,8 @@ void Teacher::createRespAndTopo()
     }
     if(SIGNALS.size() != TOPOLOGY.back())
     {
-        cout << "Ilosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;
+        cout << endl;
+        cout << "\tIlosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;
         getchar();
     }
 
@@ -124,7 +131,8 @@ void Teacher::teachNetwork()
         if(networkToTeach->backProp(RESPONSES[randS]) == false)
             flag = false;
     }
-    cout << "Siec nauczyla sie po " << epoch << " epokach" << endl;
+    cout << endl;
+    cout << "\tSiec nauczyla sie wzorca po " << epoch << " epokach" << endl;
 }
 
 void Teacher::drawResults()

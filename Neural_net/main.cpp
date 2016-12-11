@@ -2,37 +2,123 @@
 #include "net.h"
 #include "teacher.h"
 
+void drawMenu();
+void teachNet(vector<double> &netChar);
+
+
 int main()
 {
-    double   bias     =  1.000,      //      Bias - dodatkowa waga ze stałym sygnałem = zadanej wartosci || brak
-             beta     =  1.100,      //      Wsp. krzywej aktywacji                                      || brak
-             eta      =  0.200,      //      Wsp. uczenia
-             alfa     =  0.600,      //      Wsp. momentum
-             minErr   =  0.05;       //      Błąd poniżej którego nauka jest przerwana
-    unsigned blur     =  50;         //      Wsp. Określający dla jakiej rozpietości uśredniać sqErr
-
-    //  CHARAKTERYSTYKA SIECI
-    //  Napisz menu z możliwoscia wybrania opcji
-    //  Dodaj możliwość pracy z biasem
-
-    vector <double> netChar;
-    netChar.push_back(bias);
-    netChar.push_back(beta);
-    netChar.push_back(eta);
-    netChar.push_back(alfa);
-    netChar.push_back(blur);
-    netChar.push_back(minErr);
-
-    vector<unsigned> topology;
-    topology.push_back(35);
-    topology.push_back(10);
-    topology.push_back(2);
+    drawMenu();
+    return 0;
+}
 
 
-    // Średni błąd - l. zmiennych == wspólczynnikowi rozmycia błędu;
-    // Każda ze zmiennych bazowo inicjalizowana jest zerami, następnie co ilość próbek == współczynnikowi rozmycia całość jest sumowana i dzielona przez zero
+void drawMenu()
+{
+   double   bias     =  1.000,      //      Bias - dodatkowa waga ze stałym sygnałem = zadanej wartosci
+            beta     =  1.100,      //      Wsp. krzywej aktywacji                                      || brak
+            eta      =  0.200,      //      Wsp. uczenia
+            alfa     =  0.600,      //      Wsp. momentum
+            minErr   =  0.05;       //      Błąd poniżej którego nauka jest przerwana
+   unsigned blur     =  50;         //      Wsp. Określający dla jakiej rozpietości uśredniać sqErr
 
+
+   vector <double> netChar;
+   netChar.push_back(bias);
+   netChar.push_back(beta);
+   netChar.push_back(eta);
+   netChar.push_back(alfa);
+   netChar.push_back(blur);
+   netChar.push_back(minErr);
+
+   bool uit = true;
+   while(uit)
+   {
+       system("cls");
+       cout << endl;
+       cout << "\t\tMENU" << endl << endl;
+       cout << "\t1 - WCZYTAJ SIEC" << endl;
+       cout << "\t2 - WYUCZ SIEC" << endl;
+       cout << "\t0 - WYJSCIE" << endl;
+
+       unsigned menu;
+       cout << endl;
+       cout << "\tWPISZ WYBRANA OPCJE ";
+       cin >> menu;
+
+       switch(menu)
+       {
+       case 0:
+           uit = false;
+           break;
+
+       case 1:
+           //nic
+           break;
+
+       case 2:
+           teachNet(netChar);
+           break;
+
+       default:
+           cout << endl;
+           cout << "\tNIE MA TAKIEJ OPCJI" << endl;
+           getchar();getchar();
+           break;
+      }
+   }
+}
+
+void teachNet(vector<double> &netChar)
+{
+    bool uit = true;
+
+    while(uit)
+    {
+        system("cls");
+        string spec[] = {"BIAS", "BETA", "ETA", "ALFA", "BLUR", "MinERR"};
+
+        cout << endl;
+        cout << "\tCHARAKTERYSTYKA SIECI " << endl;
+        cout << endl;
+
+        cout << "\t0\tZOSTAW BEZ ZMIAN" << endl << endl;
+        for(unsigned draw = 0; draw < netChar.size(); draw++)
+        {
+            cout << "\t" << draw + 1 << "\t" << spec[draw] << "\t" << netChar[draw] << endl;
+        }
+        cout << endl;
+
+        cout << "\tWPISZ NR WARTOSCI KTORA CHCESZ ZMODYFIKOWAC ";
+
+        unsigned choose;
+        cin >> choose;
+
+        if(choose == 0)
+        {
+            break;
+        }
+
+        else if (choose > 0 && choose <= netChar.size())
+        {
+            double wyb;
+            cout << endl;
+            cout << "\tWPROWADZ PORZADANA WARTOSC ";
+            cin >> wyb;
+            netChar[choose - 1] = wyb;
+            cout << endl;
+        }
+        else if(choose > netChar.size())
+        {
+            cout << endl;
+            cout << "\tPODANO BLEDNA WARTOSC" << endl;
+            getchar();getchar();
+        }
+    }
+    getchar();
     Teacher filolog(netChar);
 
-    return 0;
+    cout << endl;
+    cout << "\tNacisnij dowolny klawisz aby wrocic do menu glownego " << endl;
+    getchar();
 }

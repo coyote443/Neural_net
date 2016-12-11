@@ -5,13 +5,14 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
     TOPOLOGY = topology;
     NETCHAR  = netChar;
 
-    BIAS = netChar[0];  // na ten moment nie bedzie biasu
+    BIAS = netChar[0];
     BETA = netChar[1];
     ETA  = netChar[2];
     ALFA = netChar[3];
     BLUR = netChar[4];
     MIN_ERR = netChar[5];
 
+    // Do określenia wielkosci sieci
     double allNeurons = 0, createdNeuronsCounter = 0;
 
     for(unsigned L = 0; L < TOPOLOGY.size(); L++)
@@ -26,15 +27,16 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             system("cls");
-            cout << "Zbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
+            cout << endl;
+            cout << "\tZbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
             if(L > 0)
             {
-                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1]) );
+                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS));
                 createdNeuronsCounter++;
             }
             else
             {
-                NETWORK[L].push_back( Neuron(0) );
+                NETWORK[L].push_back( Neuron(0, BIAS) );
                 createdNeuronsCounter++;
             }
         }
@@ -72,6 +74,8 @@ void Net::drawNetwork(bool weights, bool signalStrength)
                 unsigned Weight = NETWORK[L][N].returnWeights().size();
                 for(unsigned W = 0; W < Weight; W++)
                 {
+                    if(NETWORK[L][N].returnWeights()[W] >= 0)
+                        cout << " ";
                     cout << NETWORK[L][N].returnWeights()[W];
                     cout << "   ";
                 }
@@ -88,6 +92,8 @@ void Net::drawNetwork(bool weights, bool signalStrength)
         {
             for(unsigned N = 0; N < TOPOLOGY[L]; N++)
             {
+                if(NETWORK[L][N].returnOutput() >= 0)
+                    cout << " ";
                 cout << NETWORK[L][N].returnOutput() << endl;
             }
             cout << endl;
@@ -129,9 +135,10 @@ bool Net::backProp(vector<double> &teachSig)
             if(slowDown == 0)
             {
                 system("cls");
-                cout << "Progress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
+                cout << endl;
+                cout << "\tProgress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
                 slowDown = 20;
-                cout << "sqErrBlur =\t" << sqErrBlur << endl;
+                cout << "\tsqErrBlur =\t" << sqErrBlur << endl;
             }
 
             sqErrBlur = 0, sqErrCounter = BLUR;
@@ -205,6 +212,8 @@ void Net::saveNetwork()
         networkState << endl;
     }
     networkState.close();
+    cout << endl;
+    cout << "\tSiec jest zapisana jako 'Saves/networkSTATE.nsave'" << endl;
 }
 
 vector<double> Net::getOutput(bool drawOutput)
