@@ -9,6 +9,8 @@ class Neuron
 {
 public:
     Neuron(unsigned weights_num, double bias);
+    Neuron(unsigned weights_num, double bias, vector<double> n_weights);
+
 
     void changeOutput(double outNewVal){m_output = outNewVal;}
     void feedForward(LAYER &prevLayer);

@@ -1,10 +1,11 @@
 #include "header.h"
 #include "net.h"
 #include "teacher.h"
+#include "trans.h"
 
 void drawMenu();
 void teachNet(vector<double> &netChar);
-
+void trans(vector<unsigned> topology, vector<double> &netChar);
 
 int main()
 {
@@ -31,6 +32,8 @@ void drawMenu()
    netChar.push_back(blur);
    netChar.push_back(minErr);
 
+   vector <unsigned> topology;
+
    bool uit = true;
    while(uit)
    {
@@ -53,7 +56,9 @@ void drawMenu()
            break;
 
        case 1:
-           //nic
+           netChar.clear();
+           trans(topology, netChar);
+           getchar(); getchar();
            break;
 
        case 2:
@@ -122,3 +127,18 @@ void teachNet(vector<double> &netChar)
     cout << "\tNacisnij dowolny klawisz aby wrocic do menu glownego " << endl;
     getchar();
 }
+
+void trans(vector<unsigned> topology, vector<double> &netChar)
+{
+    Trans test(topology, netChar);
+}
+
+
+
+
+
+
+
+
+
+

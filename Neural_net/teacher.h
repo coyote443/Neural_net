@@ -8,7 +8,8 @@ typedef vector<double> LETTER;
 class Teacher
 {
 public:
-    Teacher(vector<double> &netChar);
+    Teacher(vector<double> &netChar);                           // Do szkolenia sieci
+    Teacher(vector<double> &netChar, vector<unsigned> topology);// Do jej wczytania
 private:
     Net * networkToTeach;
 

@@ -24,6 +24,32 @@ Neuron::Neuron(unsigned weights_num , double bias)
     }
 }
 
+Neuron::Neuron(unsigned weights_num, double bias, vector<double> n_weights)
+{
+    BIAS = bias;
+    if(weights_num == 0)
+    {
+        m_weights.push_back(1);
+        m_d_weights.push_back(0);
+    }
+
+    else
+    {
+        unsigned W = 0;
+        for(; W < weights_num; W++)
+        {
+            m_weights.push_back(n_weights[W]);
+            m_d_weights.push_back(0);
+        }
+        if(bias != 0)
+        {
+            m_weights.push_back(n_weights[W]);
+            m_d_weights.push_back(0);
+        }
+    }
+
+}
+
 double Neuron::randWeight(void)
 {
     double wyj;

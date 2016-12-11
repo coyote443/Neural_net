@@ -4,11 +4,13 @@
 #include "header.h"
 #include "neuron.h"
 
+typedef vector<double> neuron_weights;
 
 class Net
 {
 public:
     Net(vector<unsigned> &topology, vector<double> &netChar);
+    Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weights> &weights);
 
     void feedForward (vector<double> & inputSig);
     bool backProp(vector<double> & teachSig);
@@ -19,6 +21,7 @@ public:
 
 private:
     vector<LAYER> NETWORK;
+    vector<neuron_weights> WEIGHTS;
     vector<unsigned> TOPOLOGY;
     vector<double> NETCHAR;
     double BIAS, BETA, ETA, ALFA, BLUR, MIN_ERR;
