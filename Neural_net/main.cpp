@@ -9,15 +9,13 @@ void teachNet(vector<double> &netChar);
 int main()
 {
     drawMenu();
-    //Teacher filolog(netChar);
-
     return 0;
 }
 
 
 void drawMenu()
 {
-   double   bias     =  1.000,      //      Bias - dodatkowa waga ze stałym sygnałem = zadanej wartosci || brak
+   double   bias     =  1.000,      //      Bias - dodatkowa waga ze stałym sygnałem = zadanej wartosci
             beta     =  1.100,      //      Wsp. krzywej aktywacji                                      || brak
             eta      =  0.200,      //      Wsp. uczenia
             alfa     =  0.600,      //      Wsp. momentum

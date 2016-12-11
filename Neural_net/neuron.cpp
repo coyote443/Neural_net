@@ -1,15 +1,22 @@
 #include "neuron.h"
 
-Neuron::Neuron(unsigned weights_num )
+Neuron::Neuron(unsigned weights_num , double bias)
 {
+    BIAS = bias;
     if(weights_num == 0)
     {
         m_weights.push_back(1);
         m_d_weights.push_back(0);
     }
+
     else
     {
         for(unsigned W = 0; W < weights_num; W++)
+        {
+            m_weights.push_back(randWeight());
+            m_d_weights.push_back(0);
+        }
+        if(bias != 0)
         {
             m_weights.push_back(randWeight());
             m_d_weights.push_back(0);
@@ -43,9 +50,16 @@ void Neuron::feedForward(LAYER &prevLayer)
 {
     double agregate = 0;
 
-    for(unsigned N = 0; N < prevLayer.size(); N++)
+    unsigned N = 0;
+    for(; N < prevLayer.size(); N++)
     {
         agregate += (prevLayer[N].m_output * m_weights[N]);
+    }
+
+    // Dodatkowa waga dla BIASu
+    if(BIAS != 0)
+    {
+        agregate += (BIAS * m_weights[N]);
     }
 
     agregate = tranFun(agregate);
@@ -74,7 +88,17 @@ void Neuron::updateWeights(LAYER & prevLay, double eta, double alfa)
     for(unsigned W = 0; W < m_weights.size(); W++)
     {
         double oldDelta = m_d_weights[W];
-        double newDelta = eta * m_gradient * prevLay[W].m_output + alfa * oldDelta; // prev lay ma tyle neuronów co jest wag w outpucie
+        double newDelta;
+
+        if(W < m_weights.size())
+        {
+            newDelta = eta * m_gradient * prevLay[W].m_output + alfa * oldDelta; // prev lay ma tyle neuronów co jest wag w outpucie
+        }
+        else if(W == m_weights.size() && BIAS !=0)
+        {
+            cout << "zmieniam wagi" << endl; getchar();
+            newDelta = eta * m_gradient * BIAS + alfa * oldDelta; // prev lay ma tyle neuronów co jest wag w outpucie
+        }
 
         m_d_weights[W] = newDelta;
         m_weights[W] += newDelta;
