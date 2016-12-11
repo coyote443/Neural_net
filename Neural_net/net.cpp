@@ -26,7 +26,8 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             system("cls");
-            cout << "Zbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
+            cout << endl;
+            cout << "\tZbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
             if(L > 0)
             {
                 NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1]) );
@@ -129,9 +130,10 @@ bool Net::backProp(vector<double> &teachSig)
             if(slowDown == 0)
             {
                 system("cls");
-                cout << "Progress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
+                cout << endl;
+                cout << "\tProgress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
                 slowDown = 20;
-                cout << "sqErrBlur =\t" << sqErrBlur << endl;
+                cout << "\tsqErrBlur =\t" << sqErrBlur << endl;
             }
 
             sqErrBlur = 0, sqErrCounter = BLUR;
@@ -205,6 +207,8 @@ void Net::saveNetwork()
         networkState << endl;
     }
     networkState.close();
+    cout << endl;
+    cout << "\tSiec jest zapisana jako 'Saves/networkSTATE.nsave'" << endl;
 }
 
 vector<double> Net::getOutput(bool drawOutput)
