@@ -106,7 +106,7 @@ void Teacher::createRespAndTopo()
             RESPONSES.back().push_back(stod(subLine));           // Wrzucamy do litery jej dane
         }
     }
-    if(SIGNALS.size() != TOPOLOGY.back())
+    if(SIGNALS.size() != TOPOLOGY.back())                           // CZY TA LINIJKA MA SENS <?>
     {
         cout << endl;
         cout << "\tIlosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;

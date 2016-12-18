@@ -43,6 +43,50 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
     }
 }
 
+Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weights> &weights)
+{
+    TOPOLOGY = topology;
+    NETCHAR  = netChar;
+    WEIGHTS  = weights;
+
+    BIAS = netChar[0];
+    BETA = netChar[1];
+    ETA  = netChar[2];
+    ALFA = netChar[3];
+    BLUR = netChar[4];
+    MIN_ERR = netChar[5];
+
+    // Do określenia wielkosci sieci
+    double allNeurons = 0, createdNeuronsCounter = 0;
+
+    for(unsigned L = 0; L < TOPOLOGY.size(); L++)
+    {
+        allNeurons += TOPOLOGY[L];
+    }
+
+
+    for(unsigned L = 0; L < TOPOLOGY.size(); L++)
+    {
+        NETWORK.push_back(LAYER());
+        for(unsigned N = 0; N < TOPOLOGY[L]; N++)
+        {
+            system("cls");
+            cout << endl;
+            cout << "\tZbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
+            if(L > 0)
+            {
+                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS, WEIGHTS[L]));
+                createdNeuronsCounter++;
+            }
+            else
+            {
+                NETWORK[L].push_back( Neuron(0, BIAS) );
+                createdNeuronsCounter++;
+            }
+        }
+    }
+}
+
 void Net::feedForward (vector<double> &inputSig)
 {
     for(unsigned I = 0; I < inputSig.size(); I++)
@@ -185,35 +229,36 @@ bool Net::backProp(vector<double> &teachSig)
 void Net::saveNetwork()
 {
     fstream networkState;
-    networkState.open("Saves/networkSTATE.nsave", ios::out | ios::trunc);
+    networkState.open("Saves/nSTATE.nsave", ios::out | ios::trunc);
 
     networkState << "TOPOLOGY" << endl;
     for(unsigned t = 0; t < TOPOLOGY.size(); t++)
-        networkState << TOPOLOGY[t] << "\t";
-    networkState << endl << endl;
+        networkState << TOPOLOGY[t] << ";";
+    networkState << endl;
 
-    networkState << "BIAS\tBETA\tETA \tALFA" << endl;
+    networkState << "CHARACTER" << endl;
     for(unsigned t = 0; t < NETCHAR.size(); t++)
-        networkState << NETCHAR[t] << "\t\t";
-    networkState << endl << endl;
+        networkState << NETCHAR[t] << ";";
+    networkState << endl;
 
     networkState << "WEIGHTS" << endl;
     for(unsigned L = 0; L < TOPOLOGY.size(); L++)
     {
+        if(L > 0)
+            networkState << endl;
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             unsigned Weight = NETWORK[L][N].returnWeights().size();
             for(unsigned W = 0; W < Weight; W++)
             {
                 networkState << NETWORK[L][N].returnWeights()[W];
-                networkState << "   ";
+                networkState << ";";
             }
         }
-        networkState << endl;
     }
     networkState.close();
     cout << endl;
-    cout << "\tSiec jest zapisana jako 'Saves/networkSTATE.nsave'" << endl;
+    cout << "\tSiec jest zapisana jako 'Saves/nSTATE.nsave'" << endl;
 }
 
 vector<double> Net::getOutput(bool drawOutput)

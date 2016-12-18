@@ -6,10 +6,12 @@ CONFIG -= qt
 SOURCES += main.cpp \
     net.cpp \
     neuron.cpp \
-    teacher.cpp
+    teacher.cpp \
+    trans.cpp
 
 HEADERS += \
     header.h \
     net.h \
     neuron.h \
-    teacher.h
+    teacher.h \
+    trans.h
