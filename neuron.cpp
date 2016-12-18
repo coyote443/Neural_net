@@ -72,7 +72,7 @@ int Neuron::current_time_nanosec(void)
     return tm.tv_nsec;
 }
 
-void Neuron::feedForward(LAYER &prevLayer)
+void Neuron::feedForward(NEURON_LAYER &prevLayer)
 {
     double agregate = 0;
 
@@ -99,7 +99,7 @@ void Neuron::calcOutGrad(double Teach)
     m_gradient = delta * Neuron::transferFunctionDerr(m_output);
 }
 
-void Neuron::calcHiddGrad(LAYER &nextLay, unsigned neuron_index)
+void Neuron::calcHiddGrad(NEURON_LAYER &nextLay, unsigned neuron_index)
 {
     double gradSum = 0;
     for(unsigned N = 0; N < nextLay.size(); N++)
@@ -109,7 +109,7 @@ void Neuron::calcHiddGrad(LAYER &nextLay, unsigned neuron_index)
     m_gradient = gradSum * Neuron::transferFunctionDerr(m_output);
 }
 
-void Neuron::updateWeights(LAYER & prevLay, double eta, double alfa)
+void Neuron::updateWeights(NEURON_LAYER & prevLay, double eta, double alfa)
 {
     for(unsigned W = 0; W < m_weights.size(); W++)
     {

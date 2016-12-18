@@ -3,7 +3,7 @@
 
 #include "header.h"
 class Neuron;
-typedef vector<Neuron> LAYER;
+typedef vector<Neuron> NEURON_LAYER;
 
 class Neuron
 {
@@ -13,13 +13,13 @@ public:
 
 
     void changeOutput(double outNewVal){m_output = outNewVal;}
-    void feedForward(LAYER &prevLayer);
+    void feedForward(NEURON_LAYER &prevLayer);
 
     vector<double> & returnWeights(){return m_weights;}
     double returnOutput(){return m_output;}
     void calcOutGrad(double Teach);
-    void calcHiddGrad(LAYER & nextLay, unsigned neuron_index);
-    void updateWeights(LAYER & prevLay, double eta, double alfa);
+    void calcHiddGrad(NEURON_LAYER & nextLay, unsigned neuron_index);
+    void updateWeights(NEURON_LAYER & prevLay, double eta, double alfa);
 private:
     vector<double> m_weights;
     vector<double> m_d_weights;
