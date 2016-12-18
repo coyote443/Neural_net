@@ -4,11 +4,11 @@ Teacher::Teacher(vector<double> &netChar)
 {
     NETCHAR = netChar;
     createRespAndTopo();
-    networkToTeach = new Net(TOPOLOGY, NETCHAR);
+    networkToTeach = new Net( TOPOLOGY, NETCHAR );
     teachNetwork();
     drawResults();
     cout << endl;
-    networkToTeach->saveNetwork();
+    networkToTeach->saveNetwork( NETCHAR[5], FILENAME );    // Wysyłam ERRRATE
 }
 
 void Teacher::createRespAndTopo()
@@ -25,6 +25,8 @@ void Teacher::createRespAndTopo()
         string fileName, fileDir = "Signals/";
         getline(cin, fileName);
         fileDir +=fileName + ".nsignal";
+
+        FILENAME = fileName;
 
         toTeach.open(fileDir, ios::in);
 
@@ -119,18 +121,51 @@ void Teacher::createRespAndTopo()
 void Teacher::teachNetwork()
 {
     int epoch = 0;
-    bool flag = true;
 
-    while(flag)
+    while(true)
     {
-        epoch++;
-        int randS = rand()%TOPOLOGY.back();
+        bool flag = true;
+        while(flag)
+        {
+            epoch++;
+            int randS = rand()%TOPOLOGY.back();
 
-        networkToTeach->feedForward(SIGNALS[randS]);
+            networkToTeach->feedForward(SIGNALS[randS]);
 
-        if(networkToTeach->backProp(RESPONSES[randS]) == false)
-            flag = false;
+            if(networkToTeach->backProp(RESPONSES[randS]) == false)
+                flag = false;
+        }
+
+
+        // Jeśli sieć przeszła przez ciąg uczący, to upewniamy sie czy nie zostały jakieś nierozróżnialne klasy sygnałów
+        vector<unsigned> unTeachSignals;
+
+        for(unsigned Sig = 0; Sig < SIGNALS.size(); Sig++)
+        {
+            networkToTeach->feedForward(SIGNALS[Sig]);
+
+            vector<double> checkThisOutput = networkToTeach->getOutput(false);
+
+            for(unsigned S = 0; S < checkThisOutput.size(); S++)
+            {
+                if(checkThisOutput[S] > 0.3 && checkThisOutput[S] < 0.7)
+                    unTeachSignals.push_back(Sig);
+            }
+        }
+
+        if(unTeachSignals.size() == 0)          // Jeśli brak - kończymy
+            break;
+
+        for(unsigned x = 0; x < 50; x++)       // Jeśli zostały - staramy się nauczyć sieć ich rozróżniania
+        {
+            epoch++;
+            int randS = rand() % unTeachSignals.size();
+
+            networkToTeach->feedForward(SIGNALS[unTeachSignals[randS]]);
+            networkToTeach->backProp(RESPONSES[unTeachSignals[randS]]);
+        }
     }
+
     cout << endl;
     cout << "\tSiec nauczyla sie wzorca po " << epoch << " epokach" << endl;
 }
@@ -151,20 +186,39 @@ void Teacher::drawResults()
     }
 
     cout << fixed << endl;
-    cout.precision(4);
+    cout.precision(3);
 
     cout << "Signal\t\t";
     for(unsigned x = 0; x < TOPOLOGY.back(); x++)
-        cout << x + 1 << "\t";
+    {
+        if( (x + 1) > 8)
+            cout << x + 1 << "     ";
+        else
+        {
+            cout << x + 1 << "      ";
+        }
+    }
+
     cout << endl;
 
     for(unsigned line = 0; line < TOPOLOGY.back(); line++)
     {
         cout << "\t" << line + 1 << " ";
+        if((line + 1) < 10)
+            cout << " ";
         for(unsigned column = 0; column < OutputsArr[line].size(); column++)
         {
-            if(line == column)
+            if(OutputsArr[line][column] < 0.2)
+                SetConsoleTextAttribute( hOut, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED );
+
+            else if(OutputsArr[line][column] >= 0.9)
+                SetConsoleTextAttribute( hOut, FOREGROUND_RED | FOREGROUND_INTENSITY);
+
+            else if(OutputsArr[line][column] >= 0.7 && OutputsArr[line][column] < 0.9)
                 SetConsoleTextAttribute( hOut, FOREGROUND_RED );
+
+            else if(OutputsArr[line][column] >= 0.3 && OutputsArr[line][column] < 0.7)
+                SetConsoleTextAttribute( hOut, FOREGROUND_BLUE | FOREGROUND_RED);
 
             if(OutputsArr[column][line] >= 0)
                 cout << " ";

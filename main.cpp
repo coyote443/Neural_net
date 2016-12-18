@@ -13,15 +13,14 @@ int main()
     return 0;
 }
 
-
 void drawMenu()
 {
    double   bias     =  1.000,      //      Bias - dodatkowa waga ze stałym sygnałem = zadanej wartosci
             beta     =  1.100,      //      Wsp. krzywej aktywacji                                      || brak
-            eta      =  0.200,      //      Wsp. uczenia
+            eta      =  0.0010,     //      Wsp. uczenia
             alfa     =  0.600,      //      Wsp. momentum
-            minErr   =  0.05;       //      Błąd poniżej którego nauka jest przerwana
-   unsigned blur     =  50;         //      Wsp. Określający dla jakiej rozpietości uśredniać sqErr
+            minErr   =  0.05 ;      //      Błąd poniżej którego nauka jest przerwana
+   unsigned blur     =  100;        //      Wsp. Określający dla jakiej rozpietości uśredniać sqErr
 
 
    vector <double> netChar;
@@ -58,7 +57,7 @@ void drawMenu()
        case 1:
            netChar.clear();
            trans(topology, netChar);
-           getchar(); getchar();
+           getchar();
            break;
 
        case 2:

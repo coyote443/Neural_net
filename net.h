@@ -4,24 +4,25 @@
 #include "header.h"
 #include "neuron.h"
 
-typedef vector<double> neuron_weights;
+typedef vector<double> NET_WEIGHTS;
+typedef vector<NET_WEIGHTS> NET_LAYER;
 
 class Net
 {
 public:
     Net(vector<unsigned> &topology, vector<double> &netChar);
-    Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weights> &weights);
+    Net(vector<unsigned> &topology, vector<double> &netChar, vector<NET_LAYER> &weights);
 
     void feedForward (vector<double> & inputSig);
     bool backProp(vector<double> & teachSig);
     vector<double> getOutput(bool drawOutput = false);
 
     void drawNetwork(bool weights, bool signalStrength);
-    void saveNetwork();
+    void saveNetwork(double errRate, string fileName);
 
 private:
-    vector<LAYER> NETWORK;
-    vector<neuron_weights> WEIGHTS;
+    vector<NEURON_LAYER> NETWORK;
+    vector<NET_LAYER> WEIGHTS;
     vector<unsigned> TOPOLOGY;
     vector<double> NETCHAR;
     double BIAS, BETA, ETA, ALFA, BLUR, MIN_ERR;

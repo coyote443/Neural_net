@@ -8,7 +8,7 @@ Trans::Trans(vector<unsigned> &topology, vector<double> &netChar)
     topology = TOPOLOGY;
     netChar  = NETCHAR;
 
-    networkToLoad->drawNetwork(true, true);
+    networkToLoad->drawNetwork(true, false);
 }
 
 void Trans::loadNetwork()
@@ -48,10 +48,10 @@ void Trans::loadNetwork()
     // Wczytuje TOPOLOGY
     while(!takenLine.empty())
     {
-        unsigned poz = takenLine.find_first_of(";");            // Znajdź pierwszy znak spec
-        string subLine = takenLine.substr(0, poz);              // Zrób substring
-        takenLine.erase(0, poz+1);                              // Usuń go wraz z ';'
-        TOPOLOGY.push_back(stoul(subLine));
+        unsigned poz = takenLine.find_first_of( ";" );            // Znajdź pierwszy znak spec
+        string subLine = takenLine.substr( 0, poz );              // Zrób substring
+        takenLine.erase( 0, poz + 1 );                            // Usuń go wraz z ';'
+        TOPOLOGY.push_back( stoul(subLine) );
     }
 
 
@@ -71,17 +71,21 @@ void Trans::loadNetwork()
     // Wczytuję wagi
     getline(Load, takenLine); // Pomijam wyraz WEIGHTS
 
-    while(!Load.eof())
+    for(unsigned L = 0; L < TOPOLOGY.size(); L++)
     {
-        getline(Load, takenLine);
-
-        WEIGHTS.push_back(neuron_weights());                         // Robimy wektor dla litery
-        while(!takenLine.empty())
+        WEIGHTS.push_back(T_LAYER());
+        for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
-            unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
-            string subLine = takenLine.substr(0, poz);           // Zrób substring
-            takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
-            WEIGHTS.back().push_back(stod(subLine));             // Wrzucamy do litery jej dane
+            getline(Load, takenLine);
+            WEIGHTS[L].push_back(T_WEIGHTS());
+
+            while(!takenLine.empty())
+            {
+                unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
+                string subLine = takenLine.substr(0, poz);           // Zrób substring
+                takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
+                WEIGHTS[L][N].push_back(stod(subLine));              // Wrzucamy do litery jej dane
+            }
         }
     }
     Load.close();

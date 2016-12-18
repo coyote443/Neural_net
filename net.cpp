@@ -23,7 +23,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
 
     for(unsigned L = 0; L < TOPOLOGY.size(); L++)
     {
-        NETWORK.push_back(LAYER());
+        NETWORK.push_back(NEURON_LAYER());
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             system("cls");
@@ -43,7 +43,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
     }
 }
 
-Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weights> &weights)
+Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<NET_LAYER> &weights)
 {
     TOPOLOGY = topology;
     NETCHAR  = netChar;
@@ -67,7 +67,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weig
 
     for(unsigned L = 0; L < TOPOLOGY.size(); L++)
     {
-        NETWORK.push_back(LAYER());
+        NETWORK.push_back(NEURON_LAYER());
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             system("cls");
@@ -75,7 +75,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<neuron_weig
             cout << "\tZbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
             if(L > 0)
             {
-                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS, WEIGHTS[L]));
+                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS, WEIGHTS[L][N]));
                 createdNeuronsCounter++;
             }
             else
@@ -96,7 +96,7 @@ void Net::feedForward (vector<double> &inputSig)
 
     for(unsigned L = 1; L < TOPOLOGY.size(); L++)
     {
-        LAYER &prevLayer = NETWORK[L - 1];
+        NEURON_LAYER &prevLayer = NETWORK[L - 1];
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
             NETWORK[L][N].feedForward(prevLayer);
@@ -151,13 +151,12 @@ bool Net::backProp(vector<double> &teachSig)
 
     // Liczę błąd średniokwadratowy
     double sqErr = 0;
-    LAYER &OUTLAYER = NETWORK.back();
+    NEURON_LAYER &OUTLAYER = NETWORK.back();
 
     for(unsigned E = 0; E < teachSig.size(); E++)
         sqErr += (teachSig[E] - OUTLAYER[E].returnOutput()) * (teachSig[E] - OUTLAYER[E].returnOutput());
     sqErr /= teachSig.size();
     sqErr = sqrt(sqErr);
-
 
 
     // Czasem sqErr = 0; pomijam te wyniki z zerem usredniam Err, zgodnie ze wsp. BLUR
@@ -202,8 +201,8 @@ bool Net::backProp(vector<double> &teachSig)
     // Liczę gradient we wszystkich warstwach hidden
     for(int L = NETWORK.size() - 2 ; L >= 0 ; L--)          // czy włączyć input? // właczony
     {
-        LAYER &nextLay = NETWORK[L + 1];
-        LAYER &acctLay = NETWORK[L];
+        NEURON_LAYER &nextLay = NETWORK[L + 1];
+        NEURON_LAYER &acctLay = NETWORK[L];
 
         for(unsigned N = 0; N < acctLay.size(); N++)
         {
@@ -215,8 +214,8 @@ bool Net::backProp(vector<double> &teachSig)
     // Zmieniam wartość wag
     for (unsigned layerN = NETWORK.size() - 1; layerN > 0; layerN--)
     {
-        LAYER &prevLayer = NETWORK[layerN - 1];
-        LAYER &acctLayer = NETWORK[layerN];
+        NEURON_LAYER &prevLayer = NETWORK[layerN - 1];
+        NEURON_LAYER &acctLayer = NETWORK[layerN];
 
         for(unsigned N = 0; N < NETWORK[layerN].size(); N++)
         {
@@ -226,12 +225,14 @@ bool Net::backProp(vector<double> &teachSig)
     return true;
 }
 
-void Net::saveNetwork()
+void Net::saveNetwork(double errRate, string fileName)
 {
     fstream networkState;
-    networkState.open("Saves/nSTATE.nsave", ios::out | ios::trunc);
+    string dir = "Saves/" + fileName + ".nsave";
 
-    networkState << "TOPOLOGY" << endl;
+    networkState.open(dir, ios::out | ios::trunc);
+
+    networkState << "TOPOLOGY" << "\t\t[ErrRate " << errRate << " ]" << endl;
     for(unsigned t = 0; t < TOPOLOGY.size(); t++)
         networkState << TOPOLOGY[t] << ";";
     networkState << endl;
@@ -248,6 +249,8 @@ void Net::saveNetwork()
             networkState << endl;
         for(unsigned N = 0; N < TOPOLOGY[L]; N++)
         {
+            if(N > 0)
+                networkState << endl;
             unsigned Weight = NETWORK[L][N].returnWeights().size();
             for(unsigned W = 0; W < Weight; W++)
             {
@@ -258,7 +261,7 @@ void Net::saveNetwork()
     }
     networkState.close();
     cout << endl;
-    cout << "\tSiec jest zapisana jako 'Saves/nSTATE.nsave'" << endl;
+    cout << "\tSiec jest zapisana jako " << dir << endl;
 }
 
 vector<double> Net::getOutput(bool drawOutput)
