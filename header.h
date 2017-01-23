@@ -5,6 +5,7 @@
 #include <vector>
 #include <ctime>
 #include <math.h>
+#include <algorithm>
 #include <windows.h>
 #include <fstream>
 

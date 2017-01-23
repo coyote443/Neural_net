@@ -3,8 +3,12 @@
 Teacher::Teacher(vector<double> &netChar)
 {
     NETCHAR = netChar;
+
     createRespAndTopo();
+    createValidationSet();
+
     networkToTeach = new Net( TOPOLOGY, NETCHAR );
+
     teachNetwork();
     drawResults();
     cout << endl;
@@ -13,7 +17,7 @@ Teacher::Teacher(vector<double> &netChar)
 
 void Teacher::createRespAndTopo()
 {
-    fstream toTeach;
+    fstream sigFile;
     string takenLine;
 
     while(true)
@@ -22,15 +26,15 @@ void Teacher::createRespAndTopo()
         cout << endl;
         cout << "\tWprowadz nazwe pliku z danymi wejsciowymi z folderu Signals " << endl << endl;
         cout << "\tNAZWA PLIKU\t";
-        string fileName, fileDir = "Signals/";
-        getline(cin, fileName);
-        fileDir +=fileName + ".nsignal";
+        string fileName, signalDir = "Signals/";
+        getline( cin, fileName );
+        signalDir += fileName + ".nsignal";
 
         FILENAME = fileName;
 
-        toTeach.open(fileDir, ios::in);
+        sigFile.open( signalDir, ios::in );
 
-        if(toTeach.good() == true)
+        if(sigFile.good() == true)
         {
             break;
         }
@@ -42,98 +46,133 @@ void Teacher::createRespAndTopo()
         }
     }
 
-    getline(toTeach, takenLine); // Pomijamy wyraz TOPOLOGY
+    getline( sigFile, takenLine ); // Pomijamy wyraz TOPOLOGY
 
-    getline(toTeach, takenLine);
+    getline( sigFile, takenLine );
 
     // Wczytuje TOPOLOGY
-    while(!takenLine.empty())
+    while( ! takenLine.empty() )
     {
-        unsigned poz = takenLine.find_first_of(";");            // Znajdź pierwszy znak spec
-        string subLine = takenLine.substr(0, poz);              // Zrób substring
-        takenLine.erase(0, poz+1);                              // Usuń go wraz z ';'
-        TOPOLOGY.push_back(stoul(subLine));
+        unsigned poz = takenLine.find_first_of( ";" );            // Znajdź pierwszy znak spec
+        string subLine = takenLine.substr( 0, poz );              // Zrób substring
+        takenLine.erase( 0, poz + 1 );                            // Usuń go wraz z ';'
+        TOPOLOGY.push_back( stoul(subLine) );
     }
 
-    getline(toTeach, takenLine);
+    getline( sigFile, takenLine );
 
-    // Wczytuję SIGNALS
-    unsigned lineCounter = 3;
-    while(!toTeach.eof())
+    // Wczytuję SYGNAŁ I ODPOWIEDZI
+    while( ! sigFile.eof() )
     {
-        getline(toTeach, takenLine);
+        getline(sigFile, takenLine);
 
-        if(takenLine == "RESPONSES")
+        SIGNALS.push_back( LETTER() );                         	 // Robimy wektor dla litery
+        while( ! takenLine.empty() )
+        {
+            unsigned poz = takenLine.find_first_of( ";" );         // Znajdź pierwszy znak spec
+            string subLine = takenLine.substr( 0, poz );           // Zrób substring
+            takenLine.erase( 0, poz + 1 );                         // Usuń go wraz z ';'
+            SIGNALS.back().push_back( stod(subLine) );             // Wrzucamy do litery jej dane
+        }
+
+        getline(sigFile, takenLine);
+
+        RESPONSES.push_back(LETTER());
+        while( ! takenLine.empty() )
+        {
+            unsigned poz = takenLine.find_first_of( ";" );         // Znajdź pierwszy znak spec
+            string subLine = takenLine.substr( 0, poz );           // Zrób substring
+            takenLine.erase( 0, poz + 1 );                         // Usuń go wraz z ';'
+            RESPONSES.back().push_back( stod(subLine) );           // Wrzucamy do litery jej dane
+        }
+    }
+
+    sigFile.close();
+}
+
+void Teacher::createValidationSet(){
+
+    fstream valFile;
+    string takenLine;
+
+    while(true)
+    {
+        system("cls");
+        cout << endl;
+        string signalDir = "Signals/" + FILENAME + "v.nsignal";
+
+        valFile.open(signalDir, ios::in);
+
+        if(valFile.good() == true)
         {
             break;
         }
-
-        SIGNALS.push_back(LETTER());                         // Robimy wektor dla litery
-        while(!takenLine.empty())
-        {
-            unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
-            string subLine = takenLine.substr(0, poz);           // Zrób substring
-            takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
-            SIGNALS.back().push_back(stod(subLine));             // Wrzucamy do litery jej dane
-        }
-
-        if(SIGNALS.back().size() != TOPOLOGY[0])
-        {
+        else{
             cout << endl;
-            cout << "\tStruktura danych a ilosc neuronow wejsciowych - NIEZGODNE\nLINIA: " << lineCounter << endl;
+            cout << "\tBrak pliku Walidacyjnego" << endl;
             getchar();
         }
-
-        lineCounter++;
-    }
-    if(SIGNALS.size() != TOPOLOGY.back())
-    {
-        cout << endl;
-        cout << "\tIlosc sygnalow wejsciowych nie jest zgodna z liczba wyjsc sieci" << endl;
-        getchar();
     }
 
-
-    // Ładujemy wartości dla RESPONSES
-    while(!toTeach.eof())
+    // Wczytuję SYGNAŁ I ODPOWIEDZI
+    while( ! valFile.eof() )
     {
-        getline(toTeach, takenLine);
+        getline(valFile, takenLine);
 
-        RESPONSES.push_back(LETTER());
-        while(!takenLine.empty())
+        SIGNALS_VAL.push_back(LETTER());                         // Robimy wektor dla litery
+        while( ! takenLine.empty() )
         {
             unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
             string subLine = takenLine.substr(0, poz);           // Zrób substring
             takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
-            RESPONSES.back().push_back(stod(subLine));           // Wrzucamy do litery jej dane
+            SIGNALS_VAL.back().push_back( stod(subLine) );       // Wrzucamy do litery jej dane
+        }
+
+        getline(valFile, takenLine);
+
+        RESPONSES_VAL.push_back(LETTER());
+        while( ! takenLine.empty() )
+        {
+            unsigned poz = takenLine.find_first_of(";");         // Znajdź pierwszy znak spec
+            string subLine = takenLine.substr(0, poz);           // Zrób substring
+            takenLine.erase(0, poz + 1);                         // Usuń go wraz z ';'
+            RESPONSES_VAL.back().push_back( stod(subLine) );     // Wrzucamy do litery jej dane
         }
     }
-    if(SIGNALS.size() != TOPOLOGY.back())                           // CZY TA LINIJKA MA SENS <?>
-    {
-        cout << endl;
-        cout << "\tIlosc sygnalow uczacych nie jest zgodna z liczba wyjsc sieci" << endl;
-        getchar();
-    }
 
-    toTeach.close();
+    valFile.close();
 }
 
 void Teacher::teachNetwork()
 {
     int epoch = 0;
-
+    EPOCH = epoch;
     while(true)
     {
         bool flag = true;
         while(flag)
         {
-            epoch++;
-            int randS = rand()%TOPOLOGY.back();
+            system("cls");
+            cout << endl;
+            cout << "\t" << "EPOCH\t  =\t" << EPOCH;
 
-            networkToTeach->feedForward(SIGNALS[randS]);
+            //  TESTOWANIE ZBIORU WALIDACYJNEGO
+            for( unsigned E = 0; E < SIGNALS_VAL.size(); E++ )
+            {
+                networkToTeach->feedForward( SIGNALS_VAL[E] );
+                networkToTeach->validator( RESPONSES_VAL[E], RESPONSES_VAL.size() );
+            }
 
-            if(networkToTeach->backProp(RESPONSES[randS]) == false)
-                flag = false;
+            //  UCZENIE SIECI
+            for( unsigned E = 0; E < SIGNALS.size(); E++ )
+            {
+                networkToTeach->feedForward( SIGNALS[E] );
+                if( networkToTeach->backProp( RESPONSES[E], RESPONSES.size() ) == false)
+                {
+                    flag = false;
+                }
+            }
+            EPOCH++;
         }
 
 
@@ -154,7 +193,9 @@ void Teacher::teachNetwork()
         }
 
         if(unTeachSignals.size() == 0)          // Jeśli brak - kończymy
+        {
             break;
+        }
 
         for(unsigned x = 0; x < 50; x++)       // Jeśli zostały - staramy się nauczyć sieć ich rozróżniania
         {
@@ -162,7 +203,7 @@ void Teacher::teachNetwork()
             int randS = rand() % unTeachSignals.size();
 
             networkToTeach->feedForward(SIGNALS[unTeachSignals[randS]]);
-            networkToTeach->backProp(RESPONSES[unTeachSignals[randS]]);
+            networkToTeach->backProp(RESPONSES[unTeachSignals[randS]], RESPONSES.size());
         }
     }
 

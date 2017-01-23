@@ -9,8 +9,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
     BETA = netChar[1];
     ETA  = netChar[2];
     ALFA = netChar[3];
-    BLUR = netChar[4];
-    MIN_ERR = netChar[5];
+    MIN_ERR = netChar[4];
 
     // Do określenia wielkosci sieci
     double allNeurons = 0, createdNeuronsCounter = 0;
@@ -31,7 +30,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar)
             cout << "\tZbudowano obecnie " << createdNeuronsCounter / allNeurons * 100 << "% sieci" << endl << endl;
             if(L > 0)
             {
-                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS));
+                NETWORK[L].push_back( Neuron(TOPOLOGY[L - 1], BIAS) );
                 createdNeuronsCounter++;
             }
             else
@@ -53,8 +52,7 @@ Net::Net(vector<unsigned> &topology, vector<double> &netChar, vector<NET_LAYER> 
     BETA = netChar[1];
     ETA  = netChar[2];
     ALFA = netChar[3];
-    BLUR = netChar[4];
-    MIN_ERR = netChar[5];
+    MIN_ERR = netChar[4];
 
     // Do określenia wielkosci sieci
     double allNeurons = 0, createdNeuronsCounter = 0;
@@ -146,22 +144,22 @@ void Net::drawNetwork(bool weights, bool signalStrength)
     cout.precision(5);
 }
 
-bool Net::backProp(vector<double> &teachSig)
+bool Net::backProp(vector<double> &teachSig, unsigned uSigSize)
 {
-
     // Liczę błąd średniokwadratowy
     double sqErr = 0;
     NEURON_LAYER &OUTLAYER = NETWORK.back();
 
     for(unsigned E = 0; E < teachSig.size(); E++)
+    {
         sqErr += (teachSig[E] - OUTLAYER[E].returnOutput()) * (teachSig[E] - OUTLAYER[E].returnOutput());
+    }
     sqErr /= teachSig.size();
     sqErr = sqrt(sqErr);
 
-
-    // Czasem sqErr = 0; pomijam te wyniki z zerem usredniam Err, zgodnie ze wsp. BLUR
-    static int sqErrCounter = BLUR;
-    if(sqErr != 0)
+    // Czasem sqErr = 0; pomijam te wyniki z zerem usredniam Err
+    static int sqErrCounter = uSigSize;
+    if(sqErr > 0)
     {
         sqErrCounter--;
 
@@ -169,22 +167,12 @@ bool Net::backProp(vector<double> &teachSig)
 
         if(sqErrCounter == 0)
         {
-            sqErrBlur /= BLUR;
-            double tmp_err = sqErrBlur;
+            sqErrBlur /= uSigSize;
+            long double tmp_err = sqErrBlur;
+            cout << "\tProgress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
+            cout << "\tsqErr     =\t" << sqErrBlur << endl;
 
-            static int slowDown = 20;
-            slowDown --;
-
-            if(slowDown == 0)
-            {
-                system("cls");
-                cout << endl;
-                cout << "\tProgress  =\t" << MIN_ERR / sqErrBlur * 100  <<"%" << endl;
-                slowDown = 20;
-                cout << "\tsqErrBlur =\t" << sqErrBlur << endl;
-            }
-
-            sqErrBlur = 0, sqErrCounter = BLUR;
+            sqErrBlur = 0, sqErrCounter = uSigSize;
 
             if(tmp_err < MIN_ERR)
                 return false;
@@ -223,6 +211,41 @@ bool Net::backProp(vector<double> &teachSig)
         }
     }
     return true;
+}
+
+double Net::validator(vector<double> &valSig, unsigned uSigSize)
+{
+    // Liczę błąd średniokwadratowy
+    double sqErr = 0;
+
+    NEURON_LAYER &OUTLAYER = NETWORK.back();
+
+    for(unsigned E = 0; E < valSig.size(); E++)
+    {
+        sqErr += (valSig[E] - OUTLAYER[E].returnOutput()) * (valSig[E] - OUTLAYER[E].returnOutput());
+    }
+
+    // Czasem sqErr = 0; pomijam te wyniki z zerem usredniam Err
+    static int sqErrCounter = uSigSize;
+    if(sqErr > 0)
+    {
+        sqErrCounter--;
+
+        sqErrVal += sqErr;
+
+        if(sqErrCounter == 0)
+        {
+            sqErrVal /= uSigSize;
+            double toOut = sqErrVal;
+
+            cout << endl;
+            cout << "\tValidation=\t" << sqErrVal << endl;
+
+            sqErrVal = 0, sqErrCounter = uSigSize;
+            return toOut;
+        }
+    }
+    return 0;
 }
 
 void Net::saveNetwork(double errRate, string fileName)

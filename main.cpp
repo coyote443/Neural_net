@@ -19,16 +19,13 @@ void drawMenu()
             beta     =  1.100,      //      Wsp. krzywej aktywacji                                      || brak
             eta      =  0.0010,     //      Wsp. uczenia
             alfa     =  0.600,      //      Wsp. momentum
-            minErr   =  0.05 ;      //      Błąd poniżej którego nauka jest przerwana
-   unsigned blur     =  100;        //      Wsp. Określający dla jakiej rozpietości uśredniać sqErr
-
+            minErr   =  0.001;      //      Błąd poniżej którego nauka jest przerwana
 
    vector <double> netChar;
    netChar.push_back(bias);
    netChar.push_back(beta);
    netChar.push_back(eta);
    netChar.push_back(alfa);
-   netChar.push_back(blur);
    netChar.push_back(minErr);
 
    vector <unsigned> topology;
@@ -80,7 +77,7 @@ void teachNet(vector<double> &netChar)
     while(uit)
     {
         system("cls");
-        string spec[] = {"BIAS", "BETA", "ETA", "ALFA", "BLUR", "MinERR"};
+        string spec[] = {"BIAS", "BETA", "ETA", "ALFA", "MinERR"};
 
         cout << endl;
         cout << "\tCHARAKTERYSTYKA SIECI " << endl;

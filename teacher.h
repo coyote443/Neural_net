@@ -2,6 +2,7 @@
 #define TEACHER_H
 
 #include "net.h"
+#include "header.h"
 
 typedef vector<double> LETTER;
 
@@ -13,13 +14,19 @@ private:
     Net * networkToTeach;
 
     string FILENAME;            // Posłuży jako nazwa do zapisu
+    unsigned EPOCH;
 
     vector<LETTER> SIGNALS;
     vector<LETTER> RESPONSES;
+
+    vector<LETTER> SIGNALS_VAL;
+    vector<LETTER> RESPONSES_VAL;
+
     vector<unsigned> TOPOLOGY;
     vector<double>   NETCHAR;
 
     void createRespAndTopo();
+    void createValidationSet();
     void teachNetwork();
     void drawResults();
 };

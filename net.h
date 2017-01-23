@@ -14,7 +14,8 @@ public:
     Net(vector<unsigned> &topology, vector<double> &netChar, vector<NET_LAYER> &weights);
 
     void feedForward (vector<double> & inputSig);
-    bool backProp(vector<double> & teachSig);
+    bool backProp(vector<double> & teachSig, unsigned uSigSize);
+    double validator(vector<double> &valSig, unsigned uSigSize);
     vector<double> getOutput(bool drawOutput = false);
 
     void drawNetwork(bool weights, bool signalStrength);
@@ -25,9 +26,11 @@ private:
     vector<NET_LAYER> WEIGHTS;
     vector<unsigned> TOPOLOGY;
     vector<double> NETCHAR;
-    double BIAS, BETA, ETA, ALFA, BLUR, MIN_ERR;
+    double BIAS, BETA, ETA, ALFA, MIN_ERR;
 
-    double sqErrBlur = 0;
+    long double sqErrBlur = 0;
+    long double sqErrVal  = 0;
+
     bool sqErrBlurFun(double sqErr);
 };
 
